@@ -2,7 +2,7 @@
 // @name         Frontia Episode Extractor
 // @name:ko      프론티아 에피소드 추출기
 // @namespace    https://github.com/Knotmoon23/frontia-episode-extractor
-// @version      0.1.0
+// @version      0.1.1
 // @description  Export the episode you are editing in Frontia Studio to a single Markdown file.
 // @description:ko 프론티아 스튜디오에서 편집 중인 에피소드를 md 파일 하나로 내려받습니다.
 // @match        https://frontia.ai/*
@@ -384,9 +384,11 @@
   async function readCharInfo() {
     await goTo('charInfo');
     return $$('main textarea[name=description]').map(ta => {
+      // 카드 레이아웃이 둘: 공개 작품은 h3 글자, 이름 수정 가능한 작품(미공개 캐릭터)은 h3 없이 input[name=name] 값
       let a = ta.parentElement;
-      while (a && !a.querySelector('h3')) a = a.parentElement;
-      return { name: a ? txt($('h3', a)) : '', text: ta.value };
+      while (a && !a.querySelector('h3, input[name=name]')) a = a.parentElement;
+      const h = a && $('h3', a), n = a && $('input[name=name]', a);
+      return { name: h ? txt(h) : n ? val(n) : '', text: ta.value };
     });
   }
   async function readCharImage() {
